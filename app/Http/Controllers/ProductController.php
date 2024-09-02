@@ -39,6 +39,8 @@ class ProductController extends Controller
     }
 
 
+
+
     public function show($id)
     {
         $show = Product::find($id);
@@ -55,8 +57,13 @@ class ProductController extends Controller
         //
     }
 
-    public function update(Request $request, $product, $id)
+    public function update(Request $request, $id)
     {
+        $request->validate([
+            'name' => "required|string|max:255",
+            'category_id' => "required|integer",
+            'price' => "required|integer"
+        ]);
         $update = Product::find($id);
         if (!$update) {
             return response()->json(["message" => "tambahkan barang anda"], 404);

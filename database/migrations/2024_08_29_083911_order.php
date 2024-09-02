@@ -25,7 +25,6 @@ return new class extends Migration {
             // INT UNSIGNED NOT NULL
             $table->decimal('total_price', 10, 2);
             // DECIMAL(10, 2) NOT NULL
-
             $table->timestamp('order_date')->useCurrent();
             // TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             $table->timestamps();

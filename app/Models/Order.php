@@ -16,9 +16,9 @@ class Order extends Model
         'order_date',
 
     ];
-    public function Product()
+    public function product()
     {
-        return $this->belongsToMany(Product::class);
+        return $this->belongsTo(Product::class);
     }
 
     public function user()

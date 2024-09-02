@@ -16,15 +16,17 @@ Route::get('/user', function (Request $request) {
 
 Route::resource('user', UserController::class);
 Route::resource('categories', CategoriesController::class);
-Route::resource('order', OrderController::class);
 Route::resource('product', ProductController::class);
+
+Route::middleware('auth')->group(function () {
+    Route::apiResource('order', OrderController::class);
+    Route::get('report', [OrderController::class, 'report']);
+});
+
 
 
 Route::post('login', [AuthController::class, 'login']);
 Route::post('register', [AuthController::class, 'register']);
+Route::post('logout', [AuthController::class, 'logout']);
 
-route::group(['middleware' => ['api']], function () {
-    Route::post('logout', [AuthController::class, 'logout']);
-    Route::post('me', [AuthController::class, 'me']);
 
-});

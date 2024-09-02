@@ -11,23 +11,19 @@ class AuthController extends Controller
 {
     public function login(Request $request)
     {
-
         $request->validate([
             'email' => 'required | email',
-            'password' => 'required | string|min:6',
-
-
+            'password' => 'required | string|min:5',
         ]);
 
         $credentials = $request->only('email', 'password');
-        if (!$token = auth()->attempt($credentials))
+        if (!$token = JWTAuth::attempt($credentials))
             return response()->json(['error' => 'Unauthorized'], 40);
-
 
         return response()->json([
             'acces_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60
+            'expires_in' => JWTAuth::factory()->getTTL() * 500
 
         ], 200);
     }
