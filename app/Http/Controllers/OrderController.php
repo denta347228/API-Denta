@@ -11,8 +11,29 @@ class OrderController extends Controller
 
     public function index()
     {
-        $index = Order::all();
-        return response()->json($index, 200);
+        // Ambil semua data orders
+        $orders = Order::all();
+
+        // Format data sesuai dengan yang diinginkan
+        $formattedOrders = $orders->map(function ($order) {
+            return [
+                'id' => $order->id,
+                'product_id' => $order->product_id,
+                'quantity' => $order->quantity,
+                'total_price' => $order->total_price,
+                'customer_name' => $order->customer_name,
+                'customer_address' => $order->customer_address,
+                'created_at' => $order->created_at->format('Y-m-d\TH:i:s.u\Z'),
+                'updated_at' => $order->updated_at->format('Y-m-d\TH:i:s.u\Z'),
+            ];
+        });
+
+        // Buat response JSON dengan status dan pesan sukses
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Orders retrieved successfully',
+            'data' => $formattedOrders,
+        ], 200);
     }
 
 
@@ -26,10 +47,6 @@ class OrderController extends Controller
         // $order = Order::create($request->all());
         // return response()->json($order, 200);
 
-        $request->validate([
-            'product_id' => "required|integer",
-            'quantity' => "required|integer"
-        ]);
         $product = Product::find($request->product_id);
         if (empty($product)) {
             return response()->json(["message" => __("file kosong")], 404);
@@ -47,7 +64,23 @@ class OrderController extends Controller
             'order_date' => now()
 
         ]);
-        return response()->json($order, 200);
+
+        $response = [
+            'status' => 'success',
+            'message' => 'Order created successfully',
+            'data' => [
+                'id' => $order->id,
+                'product_id' => $order->product_id,
+                'quantity' => $order->quantity,
+                'total_price' => $order->total_price,
+                'customer_name' => $request->customer_name, // Pastikan ini dikirim dalam request
+                'customer_address' => $request->customer_address, // Pastikan ini dikirim dalam request
+                'created_at' => $order->created_at->toIso8601String(),
+                'updated_at' => $order->updated_at->toIso8601String(),
+            ],
+        ];
+        return response()->json($response, 200);
+
     }
 
     public function report()
@@ -106,38 +139,65 @@ class OrderController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'product_id' => "required|integer",
-            'quantity' => "required|integer"
+            'product_id' => 'required|integer',
+            'quantity' => 'required|integer',
         ]);
+
         $product = Product::find($request->product_id);
         if (empty($product)) {
-            return response()->json(["message" => __("file kosong")], 404);
-
+            return response()->json(["message" => "Product not found"], 404);
         }
+
         $price = $product->price;
-        $quan = $request->quantity;
-        $totalprice = $price * $quan;
-        $update = Order::find($id);
+        $quantity = $request->quantity;
+        $totalPrice = $price * $quantity;
 
-        if (!$update) {
-            return response()->json(["message" => "tambahkan barang anda"], 404);
+        $order = Order::find($id);
+
+        if (!$order) {
+            return response()->json(["message" => "Order not found"], 404);
         }
-        $update->update([
+
+        $order->update([
             'product_id' => $request->product_id,
             'quantity' => $request->quantity,
-            'total_price' => $totalprice,
+            'total_price' => $totalPrice,
         ]);
-        return response()->json($update, 200);
+
+        $response = [
+            'status' => 'success',
+            'message' => 'Order updated successfully',
+            'data' => [
+                'id' => $order->id,
+                'product_id' => $order->product_id,
+                'quantity' => $order->quantity,
+                'total_price' => $order->total_price,
+                // 'customer_name' => $order->customer_name, 
+                // 'customer_address' => $order->customer_address, 
+                'created_at' => $order->created_at->toIso8601String(),
+                'updated_at' => $order->updated_at->toIso8601String(),
+            ],
+        ];
+
+        return response()->json($response, 200);
     }
 
 
     public function destroy($id)
     {
-        $delete = Order::find($id);
-        if (!$delete) {
+        $order = Order::find($id);
+
+        if (!$order) {
             return response()->json(["message" => "Not Found"], 404);
         }
-        $delete->delete();
-        return response()->json($delete, 200);
+
+        $order->delete();
+
+        $response = [
+            'status' => 'success',
+            'message' => 'Order deleted successfully',
+        ];
+
+        return response()->json($response, 200);
     }
 }

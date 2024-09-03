@@ -23,7 +23,7 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        $temp= User::create($request->all());
+        $temp = User::create($request->all());
         return response()->json($temp, 200);
     }
 

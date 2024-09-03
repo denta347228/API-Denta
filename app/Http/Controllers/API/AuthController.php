@@ -33,8 +33,8 @@ class AuthController extends Controller
         $request->validate([
             'name' => 'required|string',
             'email' => 'required|email',
-            'password' => 'required|string|min:6',
-            'customer_address' => 'required | string|min:6'
+            'password' => 'required|string|min:5',
+            'customer_address' => 'required | string|min:5'
         ]);
 
         $user = User::create(
@@ -42,6 +42,7 @@ class AuthController extends Controller
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
+                'customer_address' => $request->customer_address
 
             ]
         );
