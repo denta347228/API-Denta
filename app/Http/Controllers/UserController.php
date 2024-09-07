@@ -11,7 +11,12 @@ class UserController extends Controller
     public function index()
     {
         $index = User::all();
-        return response()->json($index, 200);
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Orders retrieved successfully',
+            'data' => $index
+        ], 200);
+
     }
 
 
@@ -23,8 +28,14 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        $temp = User::create($request->all());
-        return response()->json($temp, 200);
+        $user = User::create($request->all());
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Order created successfully',
+            'data' => $user
+        ], 200);
+
+
     }
 
 
@@ -47,12 +58,22 @@ class UserController extends Controller
 
     public function update(Request $request, $id)
     {
+        $request->validate([
+            'name' => "required|string|max:255",
+            'customer_address' => "string|max:255",
+
+        ]);
+
         $update = User::find($id);
         if (!$update) {
             return response()->json(["message" => "tambahkan barang anda"], 404);
         }
         $update->update($request->all());
-        return response()->json($update, 200);
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Order updated successfully',
+            'data' => $update
+        ], 200);
     }
 
 
@@ -63,6 +84,10 @@ class UserController extends Controller
             return response()->json(["message" => "Not Found"], 404);
         }
         $delete->delete();
-        return response()->json($delete, 200);
+        $response = [
+            'status' => 'success',
+            'message' => 'Order deleted successfully',
+        ];
+        return response()->json($response, 200);
     }
 }

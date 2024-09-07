@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Categories;
 use Illuminate\Http\Request;
+use App\Models\Product;
 
 class CategoriesController extends Controller
 {
@@ -11,7 +12,11 @@ class CategoriesController extends Controller
     public function index()
     {
         $index = Categories::all();
-        return response()->json($index, 200);
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Orders retrieved successfully',
+            'data' => $index
+        ], 200);
     }
 
 
@@ -27,7 +32,12 @@ class CategoriesController extends Controller
         ]);
 
         $categorie = Categories::create($request->all());
-        return response()->json($categorie, 200);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Order created successfully',
+            'data' => $categorie
+        ], 200);
     }
 
 
@@ -57,17 +67,45 @@ class CategoriesController extends Controller
             return response()->json(["message" => "tambahkan barang anda"], 404);
         }
         $update->update($request->all());
-        return response()->json($update, 200);
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Order updated successfully',
+            'data' => $update
+        ], 200);
     }
 
 
     public function destroy($id)
     {
-        $delete = Categories::find($id);
-        if (!$delete) {
-            return response()->json(["message" => "Not Found"], 404);
+        try {
+            
+            $category = Categories::find($id);
+        
+    
+            if (!$category) {
+                return response()->json(["message" => "Category was not found"], 404);
+            }
+        
+          
+            if (!empty(Product::where('category_id', $id)->first())) {
+                return response()->json(["message" => "Category terhubung dengan Product"], 400);
+            }
+        
+           
+            $category->delete();
+        
+           
+            $response = [
+                'status' => 'success',
+                'message' => 'Category deleted successfully',
+                'data' => $category 
+            ];
+        
+            return response()->json($response, 200);
+        
+        } catch (\Throwable $th) {
+            
+            return response()->json(["message" => $th->getMessage()], 400);
         }
-        $delete->delete();
-        return response()->json($delete, 200);
     }
 }

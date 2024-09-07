@@ -11,8 +11,8 @@ class OrderController extends Controller
 
     public function index()
     {
-        // Ambil semua data orders
-        $orders = Order::all();
+        // Ambil semua data orders dan relasi dengan user
+        $orders = Order::with('user')->get(); // Menggunakan eager loading
 
         // Format data sesuai dengan yang diinginkan
         $formattedOrders = $orders->map(function ($order) {
@@ -21,8 +21,8 @@ class OrderController extends Controller
                 'product_id' => $order->product_id,
                 'quantity' => $order->quantity,
                 'total_price' => $order->total_price,
-                'customer_name' => $order->customer_name,
-                'customer_address' => $order->customer_address,
+                'customer_name' => $order->user->name,
+                'customer_address' => $order->user->customer_address,
                 'created_at' => $order->created_at->format('Y-m-d\TH:i:s.u\Z'),
                 'updated_at' => $order->updated_at->format('Y-m-d\TH:i:s.u\Z'),
             ];

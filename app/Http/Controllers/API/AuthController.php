@@ -12,19 +12,29 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required | email',
-            'password' => 'required | string|min:5',
+            'email' => 'required|email',
+            'password' => 'required|string|min:5',
         ]);
 
         $credentials = $request->only('email', 'password');
-        if (!$token = JWTAuth::attempt($credentials))
-            return response()->json(['error' => 'Unauthorized'], 40);
+
+        if (!$token = JWTAuth::attempt($credentials)) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $user = auth()->user(); // Mendapatkan data user yang terautentikasi
 
         return response()->json([
-            'acces_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => JWTAuth::factory()->getTTL() * 500
-
+            'status' => 'success',
+            'message' => 'Login successful',
+            'data' => [
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                ],
+                'token' => $token
+            ]
         ], 200);
     }
 
@@ -34,21 +44,31 @@ class AuthController extends Controller
             'name' => 'required|string',
             'email' => 'required|email',
             'password' => 'required|string|min:5',
-            'customer_address' => 'required | string|min:5'
+            'customer_address' => 'required|string|min:5'
         ]);
 
-        $user = User::create(
-            [
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-                'customer_address' => $request->customer_address
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'customer_address' => $request->customer_address
+        ]);
 
+        return response()->json([
+            'status' => 'success',
+            'message' => 'User registered successfully',
+            'data' => [
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'created_at' => $user->created_at,
+                    'updated_at' => $user->updated_at
+                ]
             ]
-        );
-        return response()->json(['message' => "Register Succesfully"], 200);
-
+        ], 200);
     }
+
     public function me()
     {
         return response()->json(auth()->user(), 200);
